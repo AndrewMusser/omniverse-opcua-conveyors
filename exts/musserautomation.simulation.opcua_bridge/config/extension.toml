@@ -1,0 +1,25 @@
+[core]
+reloadable = true
+order = 0
+
+[package]
+version = "1.0.0"
+category = "Simulation"
+title = "OpcUa Bridge"
+description = "An OpcUa client running in Omniverse"
+authors = ["Musser Automation"]
+repository = "https://github.com/musserautomation/Omniverse_OpcUa_Bridge_Extension"
+keywords = []
+changelog = "docs/CHANGELOG.md"
+readme = "docs/README.md"
+preview_image = "data/preview.png"
+icon = "data/icon.png"
+
+
+[dependencies]
+"omni.kit.uiapp" = {}
+"omni.isaac.ui" = {}
+"omni.isaac.core" = {}
+
+[[python.module]]
+name = "musserautomation.simulation.opcua_bridge"
