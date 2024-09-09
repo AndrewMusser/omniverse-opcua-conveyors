@@ -15,7 +15,7 @@ from omni.isaac.core.utils.prims import get_prim_object_type
 from omni.isaac.core.utils.types import ArticulationAction
 from omni.isaac.ui.element_wrappers import CollapsableFrame, DropDown, FloatField, TextBlock
 from omni.isaac.ui.ui_utils import get_style
-
+from omni.isaac.core.prims import XFormPrim
 
 class UIBuilder:
     def __init__(self):
@@ -43,6 +43,8 @@ class UIBuilder:
         # Reset internal state when UI window is closed and reopened
         self._invalidate_articulation()
 
+        self._prim = XFormPrim("/World/Cube")
+
         # Handles the case where the user loads their Articulation and
         # presses play before opening this extension
         if self._timeline.is_playing():
@@ -64,7 +66,10 @@ class UIBuilder:
         Args:
             step (float): Size of physics step
         """
-        print("Something AMAZING is about to happen.")
+       
+        pose = self._prim.get_local_pose()
+        position = pose[0]
+        print(position)
         pass
 
     def on_stage_event(self, event):
