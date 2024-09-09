@@ -1,4 +1,3 @@
-import asyncio
 from asyncua.sync import Client, ua
 
 ip = "localhost"

@@ -16,6 +16,7 @@ from omni.isaac.core.utils.types import ArticulationAction
 from omni.isaac.ui.element_wrappers import CollapsableFrame, DropDown, FloatField, TextBlock
 from omni.isaac.ui.ui_utils import get_style
 from omni.isaac.core.prims import XFormPrim
+from asyncua.sync import Client, ua
 
 class UIBuilder:
     def __init__(self):
@@ -43,7 +44,16 @@ class UIBuilder:
         # Reset internal state when UI window is closed and reopened
         self._invalidate_articulation()
 
-        self._prim = XFormPrim("/World/Cube")
+        self._prim = XFormPrim("/World/Cube_01")
+
+        ip = "localhost"
+        port = 4840
+        username = "Admin"
+        password = "password"
+        url = f"opc.tcp://{username}:{password}@{ip}:{port}/"
+        self._client = Client(url=url)
+        self._client.connect()
+        self._node = self._client.get_node("ns=6;s=::Logic:cubePosition")
 
         # Handles the case where the user loads their Articulation and
         # presses play before opening this extension
@@ -69,7 +79,12 @@ class UIBuilder:
        
         pose = self._prim.get_local_pose()
         position = pose[0]
-        print(position)
+
+        # plc_position = self._node.read_value()
+        print(position[0])
+        data_value = ua.DataValue(ua.Variant(position[0], ua.VariantType.Float))
+        self._node.write_value(data_value)
+
         pass
 
     def on_stage_event(self, event):
@@ -95,6 +110,7 @@ class UIBuilder:
         """
         for ui_elem in self.wrapped_ui_elements:
             ui_elem.cleanup()
+        self._client.disconnect()
 
     def build_ui(self):
         """
