@@ -17,6 +17,7 @@ from omni.isaac.ui.element_wrappers import CollapsableFrame, DropDown, FloatFiel
 from omni.isaac.ui.ui_utils import get_style
 from omni.isaac.core.prims import XFormPrim
 from asyncua.sync import Client, ua
+import omni.graph.core as og
 
 class UIBuilder:
     def __init__(self):
@@ -53,7 +54,29 @@ class UIBuilder:
         url = f"opc.tcp://{username}:{password}@{ip}:{port}/"
         self._client = Client(url=url)
         self._client.connect()
-        self._node = self._client.get_node("ns=6;s=::Logic:cubePosition")
+        self._cube_node = self._client.get_node("ns=6;s=::Logic:cubePosition")
+        self._conveyor_speeds_node = self._client.get_node("ns=6;s=::Logic:conveyorSpeeds")
+
+        # Get handles for all conveyors.
+        print("Retrieving conveyor handles...")
+        self._conveyor_velocity_attributes = []
+        conveyor_prim_names = [
+            "Conveyor1", 
+            "Conveyor2",
+            "Conveyor3",
+            "Conveyor4", 
+            "Conveyor5"
+        ]
+        for name in conveyor_prim_names:
+            graph = og.get_graph_by_path(f"/World/{name}/ConveyorBeltGraph")
+            node = graph.get_node(f"/World/{name}/ConveyorBeltGraph/ConveyorNode")
+            self._conveyor_velocity_attributes.append(node.get_attribute("inputs:velocity"))
+            # print(velocity_attribute.get())
+            # velocity_attribute.set(0)
+
+        print("All conveyor handles retrieved!")
+        print(self._conveyor_velocity_attributes)
+
 
         # Handles the case where the user loads their Articulation and
         # presses play before opening this extension
@@ -76,14 +99,17 @@ class UIBuilder:
         Args:
             step (float): Size of physics step
         """
-       
+        # Read cube position, and feed back to PLC.
         pose = self._prim.get_local_pose()
         position = pose[0]
-
-        # plc_position = self._node.read_value()
         print(position[0])
         data_value = ua.DataValue(ua.Variant(position[0], ua.VariantType.Float))
-        self._node.write_value(data_value)
+        self._cube_node.write_value(data_value)
+
+        # Read conveyor speeds from PLC, and assign to conveyors. 
+        speeds = self._conveyor_speeds_node.read_value()
+        for index in range(len(speeds)):
+            self._conveyor_velocity_attributes[index].set(speeds[index])
 
         pass
 
