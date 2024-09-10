@@ -18,6 +18,61 @@ from omni.isaac.ui.ui_utils import get_style
 from omni.isaac.core.prims import XFormPrim
 from asyncua.sync import Client, ua
 import omni.graph.core as og
+from omni.isaac.core import World
+from omni.isaac.core.objects import DynamicCuboid
+from omni.isaac.core.materials import OmniPBR
+import omni.kit.raycast.query
+
+class Photoeye():
+    # The photoeye logic that binds to a physical prim in the scene. 
+    # For simplicity it's assumed that the photoeyes are all pointing in the -Y direction.
+    def __init__(self, prim_path, opc_ua_node, range_min=0.0, range_max=0.8):
+        self._range_min = range_min
+        self._range_max = range_max
+        self._prim = XFormPrim(f"{prim_path}/Geometry/H30_DIF_1500X_XM_0")
+        self._position, self._rotation = self._prim.get_world_pose()
+        self._direction = [0, 1, 0]
+        self._position = self._position.astype(float)
+        self._position[1] = self._position[1] + 0.1
+        self._ray = omni.kit.raycast.query.Ray(self._position, self._direction)
+        self._raycast_interface = omni.kit.raycast.query.acquire_raycast_query_interface()
+        self._led_prim = XFormPrim(f"{prim_path}/Geometry/LED")
+        self._led_prim.set_visibility(visible=False)
+        self._opc_ua_node = opc_ua_node
+        self.triggered = True
+
+    def _status_callback(self, ray, result):
+        if result.valid:
+            # Calculate the distance to the intersection point.
+            distance = result.hit_position[1] - self._position[1]
+            print(distance)
+            if distance >= self._range_min and distance <= self._range_max:
+                self.triggered = True
+            else:
+                self.triggered = False
+        else:
+            self.triggered = False 
+        self._led_prim.set_visibility(visible=self.triggered)
+        # Lastly, write to the OPC UA node.
+        data_value = ua.DataValue(ua.Variant(self.triggered, ua.VariantType.Boolean))
+        self._opc_ua_node.write_value(data_value)
+
+    def update(self):
+        self._raycast_interface.submit_raycast_query(self._ray, self._status_callback)
+
+
+class Conveyor():
+    def __init__(self, prim_path, opc_ua_node):
+        self._opc_ua_node = opc_ua_node
+        graph = og.get_graph_by_path(f"{prim_path}/ConveyorBeltGraph")
+        node = graph.get_node(f"{prim_path}/ConveyorBeltGraph/ConveyorNode")
+        self._velocity_attribute = node.get_attribute("inputs:velocity")
+
+    def update(self):
+        # Read conveyor speed from PLC, and assign to conveyors. 
+        speed = self._opc_ua_node.read_value()
+        self._velocity_attribute.set(speed)
+
 
 class UIBuilder:
     def __init__(self):
@@ -45,8 +100,7 @@ class UIBuilder:
         # Reset internal state when UI window is closed and reopened
         self._invalidate_articulation()
 
-        self._prim = XFormPrim("/World/Cube_01")
-
+        # Set up the OPC UA communication with the PLC.
         ip = "localhost"
         port = 4840
         username = "Admin"
@@ -54,29 +108,25 @@ class UIBuilder:
         url = f"opc.tcp://{username}:{password}@{ip}:{port}/"
         self._client = Client(url=url)
         self._client.connect()
-        self._cube_node = self._client.get_node("ns=6;s=::Logic:cubePosition")
-        self._conveyor_speeds_node = self._client.get_node("ns=6;s=::Logic:conveyorSpeeds")
 
-        # Get handles for all conveyors.
-        print("Retrieving conveyor handles...")
-        self._conveyor_velocity_attributes = []
-        conveyor_prim_names = [
-            "Conveyor1", 
-            "Conveyor2",
-            "Conveyor3",
-            "Conveyor4", 
-            "Conveyor5"
-        ]
-        for name in conveyor_prim_names:
-            graph = og.get_graph_by_path(f"/World/{name}/ConveyorBeltGraph")
-            node = graph.get_node(f"/World/{name}/ConveyorBeltGraph/ConveyorNode")
-            self._conveyor_velocity_attributes.append(node.get_attribute("inputs:velocity"))
-            # print(velocity_attribute.get())
-            # velocity_attribute.set(0)
+        self._conveyors = []
+        self._conveyors.append(Conveyor("/World/Conveyor1", self._client.get_node("ns=6;s=::Logic:io.conveyor[0].aoSpeed")))
+        self._conveyors.append(Conveyor("/World/Conveyor2", self._client.get_node("ns=6;s=::Logic:io.conveyor[1].aoSpeed")))
+        self._conveyors.append(Conveyor("/World/Conveyor3", self._client.get_node("ns=6;s=::Logic:io.conveyor[2].aoSpeed")))
+        self._conveyors.append(Conveyor("/World/Conveyor4", self._client.get_node("ns=6;s=::Logic:io.conveyor[3].aoSpeed")))
+        self._conveyors.append(Conveyor("/World/Conveyor5", self._client.get_node("ns=6;s=::Logic:io.conveyor[4].aoSpeed")))
 
-        print("All conveyor handles retrieved!")
-        print(self._conveyor_velocity_attributes)
-
+        self._photoeyes = []
+        self._photoeyes.append(Photoeye("/World/Photoeye1a", self._client.get_node("ns=6;s=::Logic:io.conveyor[0].diPhotoeye1")))
+        self._photoeyes.append(Photoeye("/World/Photoeye1b", self._client.get_node("ns=6;s=::Logic:io.conveyor[0].diPhotoeye2")))
+        self._photoeyes.append(Photoeye("/World/Photoeye2a", self._client.get_node("ns=6;s=::Logic:io.conveyor[1].diPhotoeye1")))
+        self._photoeyes.append(Photoeye("/World/Photoeye2b", self._client.get_node("ns=6;s=::Logic:io.conveyor[1].diPhotoeye2")))
+        self._photoeyes.append(Photoeye("/World/Photoeye3a", self._client.get_node("ns=6;s=::Logic:io.conveyor[2].diPhotoeye1")))
+        self._photoeyes.append(Photoeye("/World/Photoeye3b", self._client.get_node("ns=6;s=::Logic:io.conveyor[2].diPhotoeye2")))
+        self._photoeyes.append(Photoeye("/World/Photoeye4a", self._client.get_node("ns=6;s=::Logic:io.conveyor[3].diPhotoeye1")))
+        self._photoeyes.append(Photoeye("/World/Photoeye4b", self._client.get_node("ns=6;s=::Logic:io.conveyor[3].diPhotoeye2")))
+        self._photoeyes.append(Photoeye("/World/Photoeye5a", self._client.get_node("ns=6;s=::Logic:io.conveyor[4].diPhotoeye1")))
+        self._photoeyes.append(Photoeye("/World/Photoeye5b", self._client.get_node("ns=6;s=::Logic:io.conveyor[4].diPhotoeye2")))
 
         # Handles the case where the user loads their Articulation and
         # presses play before opening this extension
@@ -99,17 +149,11 @@ class UIBuilder:
         Args:
             step (float): Size of physics step
         """
-        # Read cube position, and feed back to PLC.
-        pose = self._prim.get_local_pose()
-        position = pose[0]
-        print(position[0])
-        data_value = ua.DataValue(ua.Variant(position[0], ua.VariantType.Float))
-        self._cube_node.write_value(data_value)
+        for conveyor in self._conveyors:
+            conveyor.update()
 
-        # Read conveyor speeds from PLC, and assign to conveyors. 
-        speeds = self._conveyor_speeds_node.read_value()
-        for index in range(len(speeds)):
-            self._conveyor_velocity_attributes[index].set(speeds[index])
+        for photoeye in self._photoeyes:
+            photoeye.update()
 
         pass
 
@@ -134,9 +178,11 @@ class UIBuilder:
         Perform any necessary cleanup such as removing active callback functions
         Buttons imported from omni.isaac.ui.element_wrappers implement a cleanup function that should be called
         """
+        print("Closing the extension")
         for ui_elem in self.wrapped_ui_elements:
             ui_elem.cleanup()
-        self._client.disconnect()
+
+        # self._client.disconnect()
 
     def build_ui(self):
         """
@@ -283,3 +329,13 @@ class UIBuilder:
     #             if type == "articulation":
     #                 items.append(path)
     #     return items
+
+    # def _photoeye_callback(self, ray, result):
+    #     if result.valid:
+    #         # Got the raycast result in the callback
+    #         print(result.hit_position)
+
+    # def _check_photoeye(self):
+    #     ray = omni.kit.raycast.query.Ray((1000, 0, 0), (-1, 0, 0))
+    #     self._raycast_interface.submit_raycast_query(ray, self._photoeye_callback)
+
