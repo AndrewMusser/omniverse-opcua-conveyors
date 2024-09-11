@@ -5,6 +5,7 @@ VAR CONSTANT
 	MAI_CONVEYORS : USINT := 4;
 END_VAR
 VAR
+	processTimer : TON;
 	index : USINT;
 	processActive : BOOL;
 END_VAR

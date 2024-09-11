@@ -1,8 +1,10 @@
 PROGRAM _INIT
 
 	FOR index := 0 TO MAI_CONVEYORS DO
-		conveyor[index].in.beltSpeed := 0.5;
+		conveyor[index].in.beltSpeed := 1.5;
 	END_FOR
+	
+	processTimer.PT := T#5s;
 
 END_PROGRAM
 
@@ -19,7 +21,7 @@ PROGRAM _CYCLIC
 	conveyor[2].in.upstreamReadyToSend := conveyor[1].out.readyToSend;
 	conveyor[3].in.downstreamReadyToReceive := conveyor[4].out.readyToReceive;
 	conveyor[3].in.upstreamReadyToSend := conveyor[2].out.readyToSend;
-	conveyor[4].in.downstreamReadyToReceive := (NOT processActive);
+	conveyor[4].in.downstreamReadyToReceive := processTimer.Q;
 	conveyor[4].in.upstreamReadyToSend := conveyor[3].out.readyToSend;
 
 	FOR index := 0 TO MAI_CONVEYORS DO
@@ -74,6 +76,11 @@ PROGRAM _CYCLIC
 		END_CASE
 		
 	END_FOR
+	
+	// Handle process logic. 
+	processTimer.IN := conveyor[4].out.readyToSend;
+	processTimer();
+	processActive := processTimer.IN;
 	 
 END_PROGRAM
 

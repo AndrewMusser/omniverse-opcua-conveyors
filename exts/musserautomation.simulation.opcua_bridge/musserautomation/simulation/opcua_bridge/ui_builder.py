@@ -26,7 +26,7 @@ from datetime import datetime
 
 class Photoeye():
     # The photoeye logic that binds to a physical prim in the scene. 
-    # For simplicity it's assumed that the photoeyes are all pointing in the -Y direction.
+    # For simplicity it's assumed that the photoeyes are all pointing in the +Y direction.
     def __init__(self, prim_path, opc_ua_node, range_min=0.0, range_max=0.8):
         self._range_min = range_min
         self._range_max = range_max
@@ -131,7 +131,13 @@ class UIBuilder:
 
         self._ready_to_receive_node = self._client.get_node("ns=6;s=::Logic:conveyor[0].out.readyToReceive")
 
+        self._process_active_node = self._client.get_node("ns=6;s=::Logic:processActive")
+
         self._spawning_new_product = False
+        self._process_active = False
+
+        self._process_light_prim = XFormPrim("/World/Oven/SphereLight")
+        self._process_light_prim.set_visibility(visible=False)
 
         # Handles the case where the user loads their Articulation and
         # presses play before opening this extension
@@ -167,6 +173,10 @@ class UIBuilder:
             self._spawn_product()
         elif not self._ready_for_new_product:
             self._spawning_new_product = False
+
+        # Handle turning on the red light during the process step. 
+        self._process_active = self._process_active_node.read_value()
+        self._process_light_prim.set_visibility(visible=self._process_active)
 
         pass
 
