@@ -5,10 +5,10 @@ order = 0
 [package]
 version = "1.0.0"
 category = "Simulation"
-title = "OpcUa Bridge"
-description = "An OpcUa client running in Omniverse"
+title = "OpcUa Conveyors Demo"
+description = "An OpcUa client running in Omniverse to test conveyor PLC logic"
 authors = ["Musser Automation"]
-repository = "https://github.com/musserautomation/Omniverse_OpcUa_Bridge_Extension"
+repository = "https://github.com/AndrewMusser/omniverse-opcua-conveyors"
 keywords = []
 changelog = "docs/CHANGELOG.md"
 readme = "docs/README.md"
@@ -26,4 +26,4 @@ requirements = ['asyncua']
 use_online_index = true
 
 [[python.module]]
-name = "musserautomation.simulation.opcua_bridge"
+name = "musserautomation.simulation.opcua_conveyors"

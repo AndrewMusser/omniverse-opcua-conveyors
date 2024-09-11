@@ -7,6 +7,6 @@
 # license agreement from NVIDIA CORPORATION is strictly prohibited.
 #
 
-EXTENSION_TITLE = "OpcUa Bridge"
+EXTENSION_TITLE = "OpcUa Conveyors"
 
-EXTENSION_DESCRIPTION = "An OpcUa client running in Omniverse"
+EXTENSION_DESCRIPTION = "An OpcUa client running in Omniverse to test PLC conveyor logic"
