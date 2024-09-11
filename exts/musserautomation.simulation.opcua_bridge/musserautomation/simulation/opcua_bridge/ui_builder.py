@@ -111,23 +111,23 @@ class UIBuilder:
         self._client.connect()
 
         self._conveyors = []
-        self._conveyors.append(Conveyor("/World/Conveyor1", self._client.get_node("ns=6;s=::Logic:conveyor[0].io.aoSpeed")))
-        self._conveyors.append(Conveyor("/World/Conveyor2", self._client.get_node("ns=6;s=::Logic:conveyor[1].io.aoSpeed")))
-        self._conveyors.append(Conveyor("/World/Conveyor3", self._client.get_node("ns=6;s=::Logic:conveyor[2].io.aoSpeed")))
-        self._conveyors.append(Conveyor("/World/Conveyor4", self._client.get_node("ns=6;s=::Logic:conveyor[3].io.aoSpeed")))
-        self._conveyors.append(Conveyor("/World/Conveyor5", self._client.get_node("ns=6;s=::Logic:conveyor[4].io.aoSpeed")))
+        self._conveyors.append(Conveyor("/World/conveyors/Conveyor1", self._client.get_node("ns=6;s=::Logic:conveyor[0].io.aoSpeed")))
+        self._conveyors.append(Conveyor("/World/conveyors/Conveyor2", self._client.get_node("ns=6;s=::Logic:conveyor[1].io.aoSpeed")))
+        self._conveyors.append(Conveyor("/World/conveyors/Conveyor3", self._client.get_node("ns=6;s=::Logic:conveyor[2].io.aoSpeed")))
+        self._conveyors.append(Conveyor("/World/conveyors/Conveyor4", self._client.get_node("ns=6;s=::Logic:conveyor[3].io.aoSpeed")))
+        self._conveyors.append(Conveyor("/World/conveyors/Conveyor5", self._client.get_node("ns=6;s=::Logic:conveyor[4].io.aoSpeed")))
 
         self._photoeyes = []
-        self._photoeyes.append(Photoeye("/World/Photoeye1a", self._client.get_node("ns=6;s=::Logic:conveyor[0].io.diPhotoeye1")))
-        self._photoeyes.append(Photoeye("/World/Photoeye1b", self._client.get_node("ns=6;s=::Logic:conveyor[0].io.diPhotoeye2")))
-        self._photoeyes.append(Photoeye("/World/Photoeye2a", self._client.get_node("ns=6;s=::Logic:conveyor[1].io.diPhotoeye1")))
-        self._photoeyes.append(Photoeye("/World/Photoeye2b", self._client.get_node("ns=6;s=::Logic:conveyor[1].io.diPhotoeye2")))
-        self._photoeyes.append(Photoeye("/World/Photoeye3a", self._client.get_node("ns=6;s=::Logic:conveyor[2].io.diPhotoeye1")))
-        self._photoeyes.append(Photoeye("/World/Photoeye3b", self._client.get_node("ns=6;s=::Logic:conveyor[2].io.diPhotoeye2")))
-        self._photoeyes.append(Photoeye("/World/Photoeye4a", self._client.get_node("ns=6;s=::Logic:conveyor[3].io.diPhotoeye1")))
-        self._photoeyes.append(Photoeye("/World/Photoeye4b", self._client.get_node("ns=6;s=::Logic:conveyor[3].io.diPhotoeye2")))
-        self._photoeyes.append(Photoeye("/World/Photoeye5a", self._client.get_node("ns=6;s=::Logic:conveyor[4].io.diPhotoeye1")))
-        self._photoeyes.append(Photoeye("/World/Photoeye5b", self._client.get_node("ns=6;s=::Logic:conveyor[4].io.diPhotoeye2")))
+        self._photoeyes.append(Photoeye("/World/conveyors/Photoeye1a", self._client.get_node("ns=6;s=::Logic:conveyor[0].io.diPhotoeye1")))
+        self._photoeyes.append(Photoeye("/World/conveyors/Photoeye1b", self._client.get_node("ns=6;s=::Logic:conveyor[0].io.diPhotoeye2")))
+        self._photoeyes.append(Photoeye("/World/conveyors/Photoeye2a", self._client.get_node("ns=6;s=::Logic:conveyor[1].io.diPhotoeye1")))
+        self._photoeyes.append(Photoeye("/World/conveyors/Photoeye2b", self._client.get_node("ns=6;s=::Logic:conveyor[1].io.diPhotoeye2")))
+        self._photoeyes.append(Photoeye("/World/conveyors/Photoeye3a", self._client.get_node("ns=6;s=::Logic:conveyor[2].io.diPhotoeye1")))
+        self._photoeyes.append(Photoeye("/World/conveyors/Photoeye3b", self._client.get_node("ns=6;s=::Logic:conveyor[2].io.diPhotoeye2")))
+        self._photoeyes.append(Photoeye("/World/conveyors/Photoeye4a", self._client.get_node("ns=6;s=::Logic:conveyor[3].io.diPhotoeye1")))
+        self._photoeyes.append(Photoeye("/World/conveyors/Photoeye4b", self._client.get_node("ns=6;s=::Logic:conveyor[3].io.diPhotoeye2")))
+        self._photoeyes.append(Photoeye("/World/conveyors/Photoeye5a", self._client.get_node("ns=6;s=::Logic:conveyor[4].io.diPhotoeye1")))
+        self._photoeyes.append(Photoeye("/World/conveyors/Photoeye5b", self._client.get_node("ns=6;s=::Logic:conveyor[4].io.diPhotoeye2")))
 
         self._ready_to_receive_node = self._client.get_node("ns=6;s=::Logic:conveyor[0].out.readyToReceive")
 
@@ -336,7 +336,7 @@ class UIBuilder:
             DynamicCuboid(
                 prim_path=f"/World/{cube_name}", # The prim path of the cube in the USD stage
                 name=cube_name, # The unique name used to retrieve the object from the scene later on
-                position=np.array([-1.64879, 0, 2.16191]), # Using the current stage units which is in meters by default.
+                position=np.array([-28.76016, -5.26448, 2.6]), # Using the current stage units which is in meters by default.
                 scale=np.array([0.53012, 0.46643, 0.5174]), # most arguments accept mainly numpy arrays.
                 color=np.array([0.25, 0.25, 0.25]), # RGB channels, going from 0-1
             ))
