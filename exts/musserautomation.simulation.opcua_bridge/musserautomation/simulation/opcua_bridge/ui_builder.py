@@ -110,23 +110,24 @@ class UIBuilder:
         self._client.connect()
 
         self._conveyors = []
-        self._conveyors.append(Conveyor("/World/Conveyor1", self._client.get_node("ns=6;s=::Logic:io.conveyor[0].aoSpeed")))
-        self._conveyors.append(Conveyor("/World/Conveyor2", self._client.get_node("ns=6;s=::Logic:io.conveyor[1].aoSpeed")))
-        self._conveyors.append(Conveyor("/World/Conveyor3", self._client.get_node("ns=6;s=::Logic:io.conveyor[2].aoSpeed")))
-        self._conveyors.append(Conveyor("/World/Conveyor4", self._client.get_node("ns=6;s=::Logic:io.conveyor[3].aoSpeed")))
-        self._conveyors.append(Conveyor("/World/Conveyor5", self._client.get_node("ns=6;s=::Logic:io.conveyor[4].aoSpeed")))
+        self._conveyors.append(Conveyor("/World/Conveyor1", self._client.get_node("ns=6;s=::Logic:conveyor[0].io.aoSpeed")))
+        self._conveyors.append(Conveyor("/World/Conveyor2", self._client.get_node("ns=6;s=::Logic:conveyor[1].io.aoSpeed")))
+        self._conveyors.append(Conveyor("/World/Conveyor3", self._client.get_node("ns=6;s=::Logic:conveyor[2].io.aoSpeed")))
+        self._conveyors.append(Conveyor("/World/Conveyor4", self._client.get_node("ns=6;s=::Logic:conveyor[3].io.aoSpeed")))
+        self._conveyors.append(Conveyor("/World/Conveyor5", self._client.get_node("ns=6;s=::Logic:conveyor[4].io.aoSpeed")))
 
         self._photoeyes = []
-        self._photoeyes.append(Photoeye("/World/Photoeye1a", self._client.get_node("ns=6;s=::Logic:io.conveyor[0].diPhotoeye1")))
-        self._photoeyes.append(Photoeye("/World/Photoeye1b", self._client.get_node("ns=6;s=::Logic:io.conveyor[0].diPhotoeye2")))
-        self._photoeyes.append(Photoeye("/World/Photoeye2a", self._client.get_node("ns=6;s=::Logic:io.conveyor[1].diPhotoeye1")))
-        self._photoeyes.append(Photoeye("/World/Photoeye2b", self._client.get_node("ns=6;s=::Logic:io.conveyor[1].diPhotoeye2")))
-        self._photoeyes.append(Photoeye("/World/Photoeye3a", self._client.get_node("ns=6;s=::Logic:io.conveyor[2].diPhotoeye1")))
-        self._photoeyes.append(Photoeye("/World/Photoeye3b", self._client.get_node("ns=6;s=::Logic:io.conveyor[2].diPhotoeye2")))
-        self._photoeyes.append(Photoeye("/World/Photoeye4a", self._client.get_node("ns=6;s=::Logic:io.conveyor[3].diPhotoeye1")))
-        self._photoeyes.append(Photoeye("/World/Photoeye4b", self._client.get_node("ns=6;s=::Logic:io.conveyor[3].diPhotoeye2")))
-        self._photoeyes.append(Photoeye("/World/Photoeye5a", self._client.get_node("ns=6;s=::Logic:io.conveyor[4].diPhotoeye1")))
-        self._photoeyes.append(Photoeye("/World/Photoeye5b", self._client.get_node("ns=6;s=::Logic:io.conveyor[4].diPhotoeye2")))
+        self._photoeyes.append(Photoeye("/World/Photoeye1a", self._client.get_node("ns=6;s=::Logic:conveyor[0].io.diPhotoeye1")))
+        self._photoeyes.append(Photoeye("/World/Photoeye1b", self._client.get_node("ns=6;s=::Logic:conveyor[0].io.diPhotoeye2")))
+        self._photoeyes.append(Photoeye("/World/Photoeye2a", self._client.get_node("ns=6;s=::Logic:conveyor[1].io.diPhotoeye1")))
+        self._photoeyes.append(Photoeye("/World/Photoeye2b", self._client.get_node("ns=6;s=::Logic:conveyor[1].io.diPhotoeye2")))
+        self._photoeyes.append(Photoeye("/World/Photoeye3a", self._client.get_node("ns=6;s=::Logic:conveyor[2].io.diPhotoeye1")))
+        self._photoeyes.append(Photoeye("/World/Photoeye3b", self._client.get_node("ns=6;s=::Logic:conveyor[2].io.diPhotoeye2")))
+        self._photoeyes.append(Photoeye("/World/Photoeye4a", self._client.get_node("ns=6;s=::Logic:conveyor[3].io.diPhotoeye1")))
+        self._photoeyes.append(Photoeye("/World/Photoeye4b", self._client.get_node("ns=6;s=::Logic:conveyor[3].io.diPhotoeye2")))
+        self._photoeyes.append(Photoeye("/World/Photoeye5a", self._client.get_node("ns=6;s=::Logic:conveyor[4].io.diPhotoeye1")))
+        self._photoeyes.append(Photoeye("/World/Photoeye5b", self._client.get_node("ns=6;s=::Logic:conveyor[4].io.diPhotoeye2")))
+
 
         # Handles the case where the user loads their Articulation and
         # presses play before opening this extension
