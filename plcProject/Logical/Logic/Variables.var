@@ -1,0 +1,10 @@
+VAR
+	conveyor : ARRAY[0..MAI_CONVEYORS] OF Conveyor_typ;
+END_VAR
+VAR CONSTANT
+	MAI_CONVEYORS : USINT := 4;
+END_VAR
+VAR
+	index : USINT;
+	processActive : BOOL;
+END_VAR
