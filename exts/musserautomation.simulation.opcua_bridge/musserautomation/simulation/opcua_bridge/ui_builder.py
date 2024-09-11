@@ -22,6 +22,7 @@ from omni.isaac.core import World
 from omni.isaac.core.objects import DynamicCuboid
 from omni.isaac.core.materials import OmniPBR
 import omni.kit.raycast.query
+from datetime import datetime
 
 class Photoeye():
     # The photoeye logic that binds to a physical prim in the scene. 
@@ -128,6 +129,9 @@ class UIBuilder:
         self._photoeyes.append(Photoeye("/World/Photoeye5a", self._client.get_node("ns=6;s=::Logic:conveyor[4].io.diPhotoeye1")))
         self._photoeyes.append(Photoeye("/World/Photoeye5b", self._client.get_node("ns=6;s=::Logic:conveyor[4].io.diPhotoeye2")))
 
+        self._ready_to_receive_node = self._client.get_node("ns=6;s=::Logic:conveyor[0].out.readyToReceive")
+
+        self._spawning_new_product = False
 
         # Handles the case where the user loads their Articulation and
         # presses play before opening this extension
@@ -155,6 +159,14 @@ class UIBuilder:
 
         for photoeye in self._photoeyes:
             photoeye.update()
+
+        # Handle spawning new product.
+        self._ready_for_new_product = self._ready_to_receive_node.read_value()
+        if self._ready_for_new_product and not self._spawning_new_product:
+            self._spawning_new_product = True
+            self._spawn_product()
+        elif not self._ready_for_new_product:
+            self._spawning_new_product = False
 
         pass
 
@@ -314,6 +326,20 @@ class UIBuilder:
             joint_indices=np.array([joint_index]),
         )
         self.articulation.apply_action(robot_action)
+
+    def _spawn_product(self):
+        world = World()
+        now = datetime.now()
+        cube_name = f"product_{now.minute}_{now.second}_{now.microsecond}"
+        print(cube_name)
+        world.scene.add(
+            DynamicCuboid(
+                prim_path=f"/World/{cube_name}", # The prim path of the cube in the USD stage
+                name=cube_name, # The unique name used to retrieve the object from the scene later on
+                position=np.array([-1.64879, 0, 2.16191]), # Using the current stage units which is in meters by default.
+                scale=np.array([0.53012, 0.46643, 0.5174]), # most arguments accept mainly numpy arrays.
+                color=np.array([0.25, 0.25, 0.25]), # RGB channels, going from 0-1
+            ))
 
     # def _find_all_articulations(self):
     # #    Commented code left in to help a curious user gain a thorough understanding

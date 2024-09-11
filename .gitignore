@@ -1,3 +1,11 @@
+# PLC files
+/plcProject/Binaries/**
+/plcProject/Temp/**
+/plcProject/Diagnosis/**
+*.set
+
+/venv/**
+
 # Old files
 *.old
 
