@@ -1,10 +1,10 @@
 PROGRAM _INIT
 
 	FOR index := 0 TO MAI_CONVEYORS DO
-		conveyor[index].in.beltSpeed := 1.5;
+		conveyor[index].in.beltSpeed := 1.3;
 	END_FOR
 	
-	processTimer.PT := T#5s;
+	processTimer.PT := T#2.5s;
 
 END_PROGRAM
 
@@ -57,7 +57,11 @@ PROGRAM _CYCLIC
 			CONVEYOR_ST_POSITION:
 				conveyor[index].io.aoSpeed := conveyor[index].in.beltSpeed;
 				IF (conveyor[index].io.diPhotoeye2) THEN
-					conveyor[index].internal.state := CONVEYOR_ST_READY_TO_SEND;
+					IF (conveyor[index].in.downstreamReadyToReceive) THEN
+						conveyor[index].internal.state := CONVEYOR_ST_SENDING;
+					ELSE
+						conveyor[index].internal.state := CONVEYOR_ST_READY_TO_SEND;
+					END_IF				
 				END_IF
 				
 			CONVEYOR_ST_READY_TO_SEND:
