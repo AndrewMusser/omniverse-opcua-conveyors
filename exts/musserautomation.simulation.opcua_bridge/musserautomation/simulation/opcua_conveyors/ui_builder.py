@@ -37,7 +37,7 @@ class Photoeye():
         self._position[1] = self._position[1] + 0.1
         self._ray = omni.kit.raycast.query.Ray(self._position, self._direction)
         self._raycast_interface = omni.kit.raycast.query.acquire_raycast_query_interface()
-        self._led_prim = XFormPrim(f"{prim_path}/Geometry/LED")
+        self._led_prim = XFormPrim(f"{prim_path}/LED")
         self._led_prim.set_visibility(visible=False)
         self._opc_ua_node = opc_ua_node
         self.triggered = True
