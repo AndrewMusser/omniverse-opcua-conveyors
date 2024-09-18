@@ -23,6 +23,8 @@ from omni.isaac.core.objects import DynamicCuboid
 from omni.isaac.core.materials import OmniPBR
 import omni.kit.raycast.query
 from datetime import datetime
+import random
+from scipy.spatial.transform import Rotation as R
 
 class Photoeye():
     # The photoeye logic that binds to a physical prim in the scene. 
@@ -46,7 +48,6 @@ class Photoeye():
         if result.valid:
             # Calculate the distance to the intersection point.
             distance = result.hit_position[1] - self._position[1]
-            print(distance)
             if distance >= self._range_min and distance <= self._range_max:
                 self.triggered = True
             else:
@@ -85,6 +86,8 @@ class UIBuilder:
 
         # Get access to the timeline to control stop/pause/play programmatically
         self._timeline = omni.timeline.get_timeline_interface()
+
+        self._spawn_clock = 2.0
 
 
     ###################################################################################
@@ -135,6 +138,8 @@ class UIBuilder:
         self._process_light_prim = XFormPrim("/World/Oven/SphereLight")
         self._process_light_prim.set_visibility(visible=False)
 
+        self._spawn_clock = 2.0
+
         pass
 
     def on_timeline_event(self, event):
@@ -159,12 +164,13 @@ class UIBuilder:
             photoeye.update()
 
         # Handle spawning new product.
-        self._ready_for_new_product = self._ready_to_receive_node.read_value()
-        if self._ready_for_new_product and not self._spawning_new_product:
+        self._spawn_clock = self._spawn_clock + step
+        if self._spawn_clock > 4:
+            self._spawn_clock = 0
             self._spawning_new_product = True
             self._spawn_product()
-        elif not self._ready_for_new_product:
-            self._spawning_new_product = False
+        # elif not self._ready_for_new_product:
+        #     self._spawning_new_product = False
 
         # Handle turning on the red light during the process step. 
         self._process_active = self._process_active_node.read_value()
@@ -209,12 +215,20 @@ class UIBuilder:
         now = datetime.now()
         cube_name = f"product_{now.minute}_{now.second}_{now.microsecond}"
         print(cube_name)
+        random_horizontal = random.random()
+        random_vertical = random.random()
+        if random_vertical > 0.5:
+            euler_angles = np.array([random_horizontal * 0.5, 3.14159/2, 0.0])
+        else:
+            euler_angles = np.array([random_horizontal * 0.5, 0.0, 0.0])
+        print(euler_angles)
         world.scene.add(
             DynamicCuboid(
                 prim_path=f"/World/{cube_name}", # The prim path of the cube in the USD stage
                 name=cube_name, # The unique name used to retrieve the object from the scene later on
-                position=np.array([-28.76016, -5.26448, 2.6]), # Using the current stage units which is in meters by default.
-                scale=np.array([0.53012, 0.46643, 0.5174]), # most arguments accept mainly numpy arrays.
+                position=np.array([-30.73771, -14.2025, 2.3]), # Using the current stage units which is in meters by default.
+                orientation=R.from_euler('xyz', euler_angles).as_quat(),
+                scale=np.array([0.6, 0.4, 0.4]), # most arguments accept mainly numpy arrays.
                 color=np.array([0.25, 0.25, 0.25]), # RGB channels, going from 0-1
             ))
 
