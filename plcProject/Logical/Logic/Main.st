@@ -1,10 +1,10 @@
 PROGRAM _INIT
 
 	FOR index := 0 TO MAI_CONVEYORS DO
-		conveyor[index].in.beltSpeed := 1.3;
+		conveyor[index].in.beltSpeed := 1.4;
 	END_FOR
 	
-	processTimer.PT := T#2.5s;
+	processTimer.PT := T#1.7s;
 
 END_PROGRAM
 
