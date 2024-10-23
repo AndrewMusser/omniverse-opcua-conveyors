@@ -22,7 +22,7 @@ icon = "data/icon.png"
 "omni.isaac.core" = {}
 
 [python.pipapi]
-requirements = ['asyncua']
+requirements = ['asyncua', 'numpy', 'opencv-python']
 use_online_index = true
 
 [[python.module]]

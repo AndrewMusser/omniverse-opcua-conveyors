@@ -25,6 +25,7 @@ import omni.kit.raycast.query
 from datetime import datetime
 import random
 from scipy.spatial.transform import Rotation as R
+from .image_processor import ImageProcessor
 
 class Photoeye():
     # The photoeye logic that binds to a physical prim in the scene. 
@@ -89,6 +90,11 @@ class UIBuilder:
 
         self._spawn_clock = 2.0
 
+        self.image_processor = ImageProcessor()
+
+        self.require_plc = False
+        self._uniform_vertical = True
+
 
     ###################################################################################
     #           The Functions Below Are Called Automatically By extension.py
@@ -100,45 +106,47 @@ class UIBuilder:
         """
         print("Opening up the OPC UA extension...")
 
-        # Set up the OPC UA communication with the PLC.
-        ip = "localhost"
-        port = 4840
-        username = "Admin"
-        password = "password"
-        url = f"opc.tcp://{username}:{password}@{ip}:{port}/"
-        self._client = Client(url=url)
-        self._client.connect()
+        if self.require_plc:
+            # Set up the OPC UA communication with the PLC.
+            ip = "localhost"
+            port = 4840
+            username = "Admin"
+            password = "password"
+            url = f"opc.tcp://{username}:{password}@{ip}:{port}/"
+            self._client = Client(url=url)
+            self._client.connect()
 
-        self._conveyors = []
-        self._conveyors.append(Conveyor("/World/conveyors/Conveyor1", self._client.get_node("ns=6;s=::Logic:conveyor[0].io.aoSpeed")))
-        self._conveyors.append(Conveyor("/World/conveyors/Conveyor2", self._client.get_node("ns=6;s=::Logic:conveyor[1].io.aoSpeed")))
-        self._conveyors.append(Conveyor("/World/conveyors/Conveyor3", self._client.get_node("ns=6;s=::Logic:conveyor[2].io.aoSpeed")))
-        self._conveyors.append(Conveyor("/World/conveyors/Conveyor4", self._client.get_node("ns=6;s=::Logic:conveyor[3].io.aoSpeed")))
-        self._conveyors.append(Conveyor("/World/conveyors/Conveyor5", self._client.get_node("ns=6;s=::Logic:conveyor[4].io.aoSpeed")))
+            self._conveyors = []
+            self._conveyors.append(Conveyor("/World/conveyors/Conveyor1", self._client.get_node("ns=6;s=::Logic:conveyor[0].io.aoSpeed")))
+            self._conveyors.append(Conveyor("/World/conveyors/Conveyor2", self._client.get_node("ns=6;s=::Logic:conveyor[1].io.aoSpeed")))
+            self._conveyors.append(Conveyor("/World/conveyors/Conveyor3", self._client.get_node("ns=6;s=::Logic:conveyor[2].io.aoSpeed")))
+            self._conveyors.append(Conveyor("/World/conveyors/Conveyor4", self._client.get_node("ns=6;s=::Logic:conveyor[3].io.aoSpeed")))
+            self._conveyors.append(Conveyor("/World/conveyors/Conveyor5", self._client.get_node("ns=6;s=::Logic:conveyor[4].io.aoSpeed")))
 
-        self._photoeyes = []
-        self._photoeyes.append(Photoeye("/World/conveyors/Photoeye1a", self._client.get_node("ns=6;s=::Logic:conveyor[0].io.diPhotoeye1")))
-        self._photoeyes.append(Photoeye("/World/conveyors/Photoeye1b", self._client.get_node("ns=6;s=::Logic:conveyor[0].io.diPhotoeye2")))
-        self._photoeyes.append(Photoeye("/World/conveyors/Photoeye2a", self._client.get_node("ns=6;s=::Logic:conveyor[1].io.diPhotoeye1")))
-        self._photoeyes.append(Photoeye("/World/conveyors/Photoeye2b", self._client.get_node("ns=6;s=::Logic:conveyor[1].io.diPhotoeye2")))
-        self._photoeyes.append(Photoeye("/World/conveyors/Photoeye3a", self._client.get_node("ns=6;s=::Logic:conveyor[2].io.diPhotoeye1")))
-        self._photoeyes.append(Photoeye("/World/conveyors/Photoeye3b", self._client.get_node("ns=6;s=::Logic:conveyor[2].io.diPhotoeye2")))
-        self._photoeyes.append(Photoeye("/World/conveyors/Photoeye4a", self._client.get_node("ns=6;s=::Logic:conveyor[3].io.diPhotoeye1")))
-        self._photoeyes.append(Photoeye("/World/conveyors/Photoeye4b", self._client.get_node("ns=6;s=::Logic:conveyor[3].io.diPhotoeye2")))
-        self._photoeyes.append(Photoeye("/World/conveyors/Photoeye5a", self._client.get_node("ns=6;s=::Logic:conveyor[4].io.diPhotoeye1")))
-        self._photoeyes.append(Photoeye("/World/conveyors/Photoeye5b", self._client.get_node("ns=6;s=::Logic:conveyor[4].io.diPhotoeye2")))
+            self._photoeyes = []
+            self._photoeyes.append(Photoeye("/World/conveyors/Photoeye1a", self._client.get_node("ns=6;s=::Logic:conveyor[0].io.diPhotoeye1")))
+            self._photoeyes.append(Photoeye("/World/conveyors/Photoeye1b", self._client.get_node("ns=6;s=::Logic:conveyor[0].io.diPhotoeye2")))
+            self._photoeyes.append(Photoeye("/World/conveyors/Photoeye2a", self._client.get_node("ns=6;s=::Logic:conveyor[1].io.diPhotoeye1")))
+            self._photoeyes.append(Photoeye("/World/conveyors/Photoeye2b", self._client.get_node("ns=6;s=::Logic:conveyor[1].io.diPhotoeye2")))
+            self._photoeyes.append(Photoeye("/World/conveyors/Photoeye3a", self._client.get_node("ns=6;s=::Logic:conveyor[2].io.diPhotoeye1")))
+            self._photoeyes.append(Photoeye("/World/conveyors/Photoeye3b", self._client.get_node("ns=6;s=::Logic:conveyor[2].io.diPhotoeye2")))
+            self._photoeyes.append(Photoeye("/World/conveyors/Photoeye4a", self._client.get_node("ns=6;s=::Logic:conveyor[3].io.diPhotoeye1")))
+            self._photoeyes.append(Photoeye("/World/conveyors/Photoeye4b", self._client.get_node("ns=6;s=::Logic:conveyor[3].io.diPhotoeye2")))
+            self._photoeyes.append(Photoeye("/World/conveyors/Photoeye5a", self._client.get_node("ns=6;s=::Logic:conveyor[4].io.diPhotoeye1")))
+            self._photoeyes.append(Photoeye("/World/conveyors/Photoeye5b", self._client.get_node("ns=6;s=::Logic:conveyor[4].io.diPhotoeye2")))
 
-        self._ready_to_receive_node = self._client.get_node("ns=6;s=::Logic:conveyor[0].out.readyToReceive")
+            self._ready_to_receive_node = self._client.get_node("ns=6;s=::Logic:conveyor[0].out.readyToReceive")
 
-        self._process_active_node = self._client.get_node("ns=6;s=::Logic:processActive")
+            self._process_active_node = self._client.get_node("ns=6;s=::Logic:processActive")
 
-        self._spawning_new_product = False
-        self._process_active = False
+            self._spawning_new_product = False
+            self._process_active = False
 
-        self._process_light_prim = XFormPrim("/World/Oven/SphereLight")
-        self._process_light_prim.set_visibility(visible=False)
+            self._process_light_prim = XFormPrim("/World/Oven/SphereLight")
+            self._process_light_prim.set_visibility(visible=False)
 
         self._spawn_clock = 2.0
+        self._capture_clock = 0
 
         pass
 
@@ -157,11 +165,12 @@ class UIBuilder:
         Args:
             step (float): Size of physics step
         """
-        for conveyor in self._conveyors:
-            conveyor.update()
+        if self.require_plc:
+            for conveyor in self._conveyors:
+                conveyor.update()
 
-        for photoeye in self._photoeyes:
-            photoeye.update()
+            for photoeye in self._photoeyes:
+                photoeye.update()
 
         # Handle spawning new product.
         self._spawn_clock = self._spawn_clock + step
@@ -173,8 +182,16 @@ class UIBuilder:
         #     self._spawning_new_product = False
 
         # Handle turning on the red light during the process step. 
-        self._process_active = self._process_active_node.read_value()
-        self._process_light_prim.set_visibility(visible=self._process_active)
+        if self.require_plc:
+            self._process_active = self._process_active_node.read_value()
+            self._process_light_prim.set_visibility(visible=self._process_active)
+
+        self._capture_clock = self._capture_clock + step
+        print(self._capture_clock)
+        if self._capture_clock > 0.01:
+            self._capture_clock = 0
+            self.image_processor.capture_image()
+            self.image_processor.process_image()
 
         pass
 
@@ -214,21 +231,20 @@ class UIBuilder:
         world = World()
         now = datetime.now()
         cube_name = f"product_{now.minute}_{now.second}_{now.microsecond}"
-        print(cube_name)
-        random_horizontal = random.random()
-        random_vertical = random.random()
-        if random_vertical > 0.5:
-            euler_angles = np.array([random_horizontal * 0.5, 3.14159/2, 0.0])
+        random_orientation_horizontal = random.random()
+        random_orientation_vertical = random.random()
+        if random_orientation_vertical > 0.5 and not self._uniform_vertical:
+            euler_angles = np.array([random_orientation_horizontal * 0.5, 3.14159/2, 0.0])
         else:
-            euler_angles = np.array([random_horizontal * 0.5, 0.0, 0.0])
-        print(euler_angles)
+            euler_angles = np.array([random_orientation_horizontal * 0.5, 0.0, 0.0])
+        random_position = random.random() * 0.25
         world.scene.add(
             DynamicCuboid(
                 prim_path=f"/World/{cube_name}", # The prim path of the cube in the USD stage
                 name=cube_name, # The unique name used to retrieve the object from the scene later on
-                position=np.array([-30.73771, -14.2025, 2.3]), # Using the current stage units which is in meters by default.
+                position=np.array([-30.73771 - 0.125 + random_position, -14.2025, 2.3]), # Using the current stage units which is in meters by default.
                 orientation=R.from_euler('xyz', euler_angles).as_quat(),
-                scale=np.array([0.6, 0.4, 0.4]), # most arguments accept mainly numpy arrays.
+                scale=np.array([0.3, 0.2, 0.2]), # most arguments accept mainly numpy arrays.
                 color=np.array([0.25, 0.25, 0.25]), # RGB channels, going from 0-1
             ))
 
