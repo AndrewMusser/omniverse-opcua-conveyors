@@ -12,6 +12,11 @@ jobs:
     steps:
       - name: Pull the Docker image
         run: docker pull musserautomation/bnr-as412
+            
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          path: CustomRepoFolder
 
       - name: Run the container and execute the build process
         run: |
@@ -19,7 +24,7 @@ jobs:
             --name bnr_as412_container `
             -v "${{ github.workspace }}:C:\workspace" `
             musserautomation/bnr-as412 `
-            powershell -Command "& 'C:\BrAutomation\AS412\bin-en\BR.AS.Build.exe' -h"
+            powershell -Command "& 'C:\BrAutomation\AS412\bin-en\BR.AS.Build.exe' 'C:\workspace\CustomRepoFolder\plcProject\plcProject.apj' -c 'Simulation' -buildMode 'Build'"
 
       - name: Show logs if the build fails
         if: failure()
