@@ -24,7 +24,7 @@ jobs:
             --name bnr_as412_container `
             -v "${{ github.workspace }}:C:\workspace" `
             musserautomation/bnr-as412 `
-            powershell -Command "& 'C:\BrAutomation\AS412\bin-en\BR.AS.Build.exe' 'C:\workspace\CustomRepoFolder\plcProject\plcProject.apj' -c 'Simulation' -buildMode 'Build'"
+            powershell -Command "& 'C:\BrAutomation\AS412\bin-en\BR.AS.Build.exe' 'C:\workspace\CustomRepoFolder\plcProject\plcProject.apj' -c 'Simulator' -buildMode 'Build'"
 
       - name: Show logs if the build fails
         if: failure()
