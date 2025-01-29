@@ -1,0 +1,23 @@
+name: Build PLC project with Github-managed runner (using a Docker image)
+# Trigger this pipeline on every push to the main branch.
+on:
+  push:
+    branches:
+      - feature/ci-test
+# Define the job to be run when the trigger occurs.
+jobs:
+  custom-build-job:
+    runs-on: windows-2022
+    container: musserautomation/bnr-as412
+    steps:
+      # Step 1: Checkout the repository into a specific folder.
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          path: CustomRepoFolder
+
+      # Step 2: Call the executable to build the repository.
+      - name: Build Project
+        run: |
+          echo Starting build process...
+          "C:\BrAutomation\AS412\bin-en\BR.AS.Build.exe" "${{ github.workspace}}\CustomRepoFolder\plcProject\plcProject.apj "-c "Simulation" -buildMode "Build"
